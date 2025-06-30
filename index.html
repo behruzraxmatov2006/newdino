@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Modded Dino Game</title>
+  <style>
+    canvas {
+      background: #f7f7f7;
+      display: block;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+<audio id="bgMusic" src="pinkpanther.mp3" autoplay loop></audio>
+<canvas id="gameCanvas" width="800" height="200"></canvas>
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const bgMusic = document.getElementById('bgMusic');
+  bgMusic.volume = 0.3; // musiqa ovozini nazorat qilish
+
+  let dino = {
+    x: 50,
+    y: 160,
+    width: 20,
+    height: 20,
+    velocityY: 0,
+    isJumping: false
+  };
+  let gravity = 1;
+  let speed = 500; // turbo mode!
+  let obstacles = [];
+  let gameFrame = 0;
+
+  document.addEventListener('keydown', function (e) {
+    if (e.code === 'Space' && !dino.isJumping) {
+      dino.velocityY = -15;
+      dino.isJumping = true;
+
+      // Jump sound (optional)
+      // let jumpSound = new Audio('jump.mp3');
+      // jumpSound.play();
+    }
+  });
+
+  function drawDino() {
+    ctx.fillStyle = 'green';
+    ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+  }
+
+  function drawObstacles() {
+    ctx.fillStyle = 'red';
+    obstacles.forEach(obs => {
+      ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+    });
+  }
+
+  function updateDino() {
+    dino.y += dino.velocityY;
+    dino.velocityY += gravity;
+    if (dino.y >= 160) {
+      dino.y = 160;
+      dino.isJumping = false;
+    }
+  }
+
+  function spawnObstacle() {
+    obstacles.push({ x: canvas.width, y: 160, width: 20, height: 20 });
+  }
+
+  function updateObstacles() {
+    obstacles.forEach(obs => {
+      obs.x -= speed;
+    });
+    obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
+  }
+
+  function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawDino();
+    drawObstacles();
+    updateDino();
+    updateObstacles();
+
+    // No death mod: collision check is removed
+
+    if (gameFrame % 60 === 0) {
+      spawnObstacle();
+    }
+
+    gameFrame++;
+    requestAnimationFrame(gameLoop);
+  }
+
+  gameLoop();
+</script>
+</body>
+</html>
